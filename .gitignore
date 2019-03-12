@@ -1,0 +1,24 @@
+# scarp build artifacts
+build/
+bin/
+*.o
+*.a
+*.so
+*.dylib
+*.dis
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs and temp files
+*.log
+*.tmp
+*.out
+
+# macOS files
+.DS_Store
