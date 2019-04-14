@@ -74,6 +74,34 @@ DisThread* dis_vm_spawn_thread(DisVM* vm, uint32_t start_pc, size_t frame_size) 
     return t;
 }
 
+size_t dis_vm_thread_count(const DisVM* vm) {
+    if (!vm) return 0;
+    size_t count = 0;
+    DisThread* curr = vm->thread_head;
+    while (curr) {
+        count++;
+        curr = curr->next;
+    }
+    return count;
+}
+
+size_t dis_vm_active_thread_count(const DisVM* vm) {
+    if (!vm) return 0;
+    size_t count = 0;
+    DisThread* curr = vm->thread_head;
+    while (curr) {
+        if (curr->state == THREAD_READY || curr->state == THREAD_RUNNING) {
+            count++;
+        }
+        curr = curr->next;
+    }
+    return count;
+}
+
+uint64_t dis_vm_cycle_count(const DisVM* vm) {
+    return vm ? vm->cycle_counter : 0;
+}
+
 static void* resolve_addr(DisVM* vm, DisThread* t, const DisOperand* op) {
     switch (op->mode) {
         case DIS_ADDR_FRAME:

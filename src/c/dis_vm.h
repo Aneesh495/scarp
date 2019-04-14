@@ -148,8 +148,11 @@ DisVM*       dis_vm_create(void);
 void         dis_vm_destroy(DisVM* vm);
 int          dis_vm_load_code(DisVM* vm, const DisInstr* instructions, size_t count);
 DisThread*   dis_vm_spawn_thread(DisVM* vm, uint32_t start_pc, size_t frame_size);
+size_t       dis_vm_thread_count(const DisVM* vm);
+size_t       dis_vm_active_thread_count(const DisVM* vm);
 int          dis_vm_step(DisVM* vm);
 int          dis_vm_run(DisVM* vm, uint64_t max_cycles);
+uint64_t     dis_vm_cycle_count(const DisVM* vm);
 
 /* Channel API */
 DisChannel*  dis_chan_create(size_t elem_size, size_t capacity);
