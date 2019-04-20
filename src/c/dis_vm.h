@@ -143,6 +143,19 @@ typedef struct DisVM {
     uint8_t           global_mem[65536];
 } DisVM;
 
+/* Limbo Channel Alt Operation Descriptor */
+typedef enum {
+    DIS_ALT_RECV = 0,
+    DIS_ALT_SEND = 1
+} DisAltOp;
+
+typedef struct {
+    DisChannel* chan;
+    DisAltOp    op;
+    void*       data_ptr;
+    bool        ready;
+} DisAltCase;
+
 /* Virtual Machine API */
 DisVM*       dis_vm_create(void);
 void         dis_vm_destroy(DisVM* vm);
@@ -159,6 +172,7 @@ DisChannel*  dis_chan_create(size_t elem_size, size_t capacity);
 void         dis_chan_destroy(DisChannel* ch);
 int          dis_chan_send(DisChannel* ch, const void* data, bool nonblocking);
 int          dis_chan_recv(DisChannel* ch, void* out_data, bool nonblocking);
+int          dis_chan_alt(DisAltCase* cases, size_t ncases, bool nonblocking);
 void         dis_chan_close(DisChannel* ch);
 
 #ifdef __cplusplus

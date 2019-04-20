@@ -417,6 +417,50 @@ int dis_chan_recv(DisChannel* ch, void* out_data, bool nonblocking) {
     return 1;
 }
 
+int dis_chan_alt(DisAltCase* cases, size_t ncases, bool nonblocking) {
+    if (!cases || ncases == 0) return -1;
+
+    /* Polling loop */
+    while (1) {
+        for (size_t i = 0; i < ncases; i++) {
+            DisChannel* ch = cases[i].chan;
+            if (!ch) continue;
+
+            pthread_mutex_lock(&ch->lock);
+            if (cases[i].op == DIS_ALT_RECV) {
+                if (ch->count > 0) {
+                    memcpy(cases[i].data_ptr, ch->buffer + (ch->head * ch->elem_size), ch->elem_size);
+                    ch->head = (ch->head + 1) % ch->capacity;
+                    ch->count--;
+                    pthread_cond_signal(&ch->cond_send);
+                    pthread_mutex_unlock(&ch->lock);
+                    return (int)i;
+                }
+            } else if (cases[i].op == DIS_ALT_SEND) {
+                if (ch->count < ch->capacity && !ch->closed) {
+                    memcpy(ch->buffer + (ch->tail * ch->elem_size), cases[i].data_ptr, ch->elem_size);
+                    ch->tail = (ch->tail + 1) % ch->capacity;
+                    ch->count++;
+                    pthread_cond_signal(&ch->cond_recv);
+                    pthread_mutex_unlock(&ch->lock);
+                    return (int)i;
+                }
+            }
+            pthread_mutex_unlock(&ch->lock);
+        }
+
+        if (nonblocking) {
+            return -1;
+        }
+
+        /* Brief backoff to yield execution */
+        struct timespec ts;
+        ts.tv_sec = 0;
+        ts.tv_nsec = 500000; /* 0.5 ms */
+        nanosleep(&ts, NULL);
+    }
+}
+
 void dis_chan_close(DisChannel* ch) {
     if (!ch) return;
     pthread_mutex_lock(&ch->lock);
