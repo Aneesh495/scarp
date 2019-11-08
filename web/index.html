@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>scarp: Seismic Early Warning &amp; Kinematic Inversion Workbench</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="navbar">
+    <div class="brand">
+      <span class="logo-icon">&#x25c6;</span>
+      <span class="brand-name">scarp</span>
+      <span class="brand-tag">Seismic Early Warning &amp; Kinematic Inversion</span>
+    </div>
+    <div class="nav-metrics">
+      <div class="metric-pill">
+        <span class="label">CORE:</span>
+        <span class="val highlight">Limbo (CSP)</span>
+      </div>
+      <div class="metric-pill">
+        <span class="label">ACCELERATION:</span>
+        <span class="val">C11 SIMD</span>
+      </div>
+      <div class="metric-pill">
+        <span class="label">PROTOCOL:</span>
+        <span class="val">Styx 9P2000</span>
+      </div>
+      <div class="metric-pill">
+        <span class="label">STATUS:</span>
+        <span class="status-dot"></span>
+        <span class="val">ONLINE</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Real-Time Urgent Warning Banner -->
+  <section id="alert-banner" class="alert-banner active">
+    <div class="alert-pulse"></div>
+    <div class="alert-content">
+      <div class="alert-title-group">
+        <span class="badge-urgent">EARTHQUAKE EARLY WARNING</span>
+        <span id="alert-event-id" class="alert-event-id">EVT-2026-NAPA-60</span>
+      </div>
+      <div class="alert-grid">
+        <div class="alert-metric">
+          <div class="metric-desc">ESTIMATED MAGNITUDE</div>
+          <div class="metric-value-lg"><span id="alert-mag">6.0</span> <span class="unit">Mw</span></div>
+        </div>
+        <div class="alert-metric">
+          <div class="metric-desc">LOCAL PEAK INTENSITY</div>
+          <div class="metric-value-lg"><span id="alert-mmi" class="mmi-badge mmi-7">VII</span> <span class="unit">Very Strong</span></div>
+        </div>
+        <div class="alert-metric countdown-metric">
+          <div class="metric-desc">S-WAVE ARRIVAL IN</div>
+          <div class="metric-value-xl countdown-num"><span id="alert-tti">12.4</span> <span class="unit">s</span></div>
+        </div>
+        <div class="alert-metric">
+          <div class="metric-desc">PEAK GROUND ACCEL</div>
+          <div class="metric-value-lg"><span id="alert-pga">28.4</span> <span class="unit">%g</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="workbench-layout">
+    <!-- Left Column: Spatial GIS Map and ShakeMap Grid -->
+    <div class="panel map-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span class="panel-icon">&#x25a3;</span>
+          <span>Kinematic Wavefield &amp; ShakeMap Grid</span>
+        </div>
+        <div class="panel-actions">
+          <button id="btn-replay-napa" class="btn btn-sm">Replay Napa M6.0</button>
+          <button id="btn-replay-ridgecrest" class="btn btn-sm">Replay Ridgecrest M7.1</button>
+          <button id="btn-trigger-synthetic" class="btn btn-sm btn-primary">Trigger Event</button>
+        </div>
+      </div>
+      <div class="canvas-container">
+        <canvas id="map-canvas" width="800" height="520"></canvas>
+        <div class="map-legend">
+          <div class="legend-title">Modified Mercalli Intensity (MMI)</div>
+          <div class="legend-scale">
+            <span class="scale-step mmi-1">I</span>
+            <span class="scale-step mmi-2">II</span>
+            <span class="scale-step mmi-3">III</span>
+            <span class="scale-step mmi-4">IV</span>
+            <span class="scale-step mmi-5">V</span>
+            <span class="scale-step mmi-6">VI</span>
+            <span class="scale-step mmi-7">VII</span>
+            <span class="scale-step mmi-8">VIII</span>
+            <span class="scale-step mmi-9">IX</span>
+            <span class="scale-step mmi-10">X+</span>
+          </div>
+        </div>
+      </div>
+      <div class="map-footer-stats">
+        <span>Focal Coordinates: 34.150 N, 118.250 W</span>
+        <span>Depth: 12.0 km</span>
+        <span>Azimuthal Gap: 52 deg</span>
+        <span>RMS Residual: 0.024 s</span>
+      </div>
+    </div>
+
+    <!-- Right Column: Live Seismograms and Telemetry Counters -->
+    <div class="panel telemetry-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span class="panel-icon">&#x223f;</span>
+          <span>Station Telemetry &amp; Pick Extraction (CI.PAS)</span>
+        </div>
+        <div class="telemetry-badge">100 Hz Streaming</div>
+      </div>
+
+      <div class="oscilloscope-container">
+        <div class="trace-label">Vertical Acceleration (HNZ) - Pick: t = 4.82s</div>
+        <canvas id="trace-z" width="500" height="110"></canvas>
+
+        <div class="trace-label">North-South (HNN) - S-Wave Arrival: t = 8.24s</div>
+        <canvas id="trace-n" width="500" height="110"></canvas>
+
+        <div class="trace-label">East-West (HNE) - Strong Shaking Waveform</div>
+        <canvas id="trace-e" width="500" height="110"></canvas>
+      </div>
+
+      <div class="station-table-card">
+        <div class="card-title">Network Station Array Status</div>
+        <table class="station-table">
+          <thead>
+            <tr>
+              <th>Station</th>
+              <th>Dist</th>
+              <th>P-Pick</th>
+              <th>Pd (cm)</th>
+              <th>Tau_c (s)</th>
+              <th>State</th>
+            </tr>
+          </thead>
+          <tbody id="station-tbody">
+            <tr>
+              <td>CI.PAS</td>
+              <td>14.2 km</td>
+              <td>04.82s</td>
+              <td>0.48</td>
+              <td>0.82</td>
+              <td><span class="badge-status online">P-TRIGGERED</span></td>
+            </tr>
+            <tr>
+              <td>CI.USC</td>
+              <td>22.5 km</td>
+              <td>06.12s</td>
+              <td>0.31</td>
+              <td>0.79</td>
+              <td><span class="badge-status online">P-TRIGGERED</span></td>
+            </tr>
+            <tr>
+              <td>CI.SVD</td>
+              <td>38.1 km</td>
+              <td>08.75s</td>
+              <td>0.14</td>
+              <td>0.81</td>
+              <td><span class="badge-status standby">STANDBY</span></td>
+            </tr>
+            <tr>
+              <td>CI.DEV</td>
+              <td>44.0 km</td>
+              <td>09.68s</td>
+              <td>0.09</td>
+              <td>0.75</td>
+              <td><span class="badge-status standby">STANDBY</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-left">
+      <span>scarp v1.0.0</span>
+      <span class="divider">|</span>
+      <span>Inferno / Limbo Core</span>
+      <span class="divider">|</span>
+      <span>Synthetic /dev/scarp/ Mounted</span>
+    </div>
+    <div class="footer-right">
+      <span>9P Styx Server: tcp!127.0.0.1!9999</span>
+      <span class="divider">|</span>
+      <span>Zero Em Dash Enforced</span>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
