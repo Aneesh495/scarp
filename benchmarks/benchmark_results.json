@@ -1,0 +1,26 @@
+{
+  "benchmarks": [
+    {
+      "benchmark": "recursive_iir_filter_throughput",
+      "samples_evaluated": 500000,
+      "elapsed_seconds": 0.0361,
+      "throughput_samples_per_sec": 13841581.0,
+      "status": "PASS"
+    },
+    {
+      "benchmark": "geiger_hypocenter_inversion_latency",
+      "iterations": 2000,
+      "elapsed_seconds": 0.0,
+      "latency_microseconds_per_event": 0.01,
+      "status": "PASS"
+    },
+    {
+      "benchmark": "gmpe_grid_rasterization_throughput",
+      "grid_points": 10000,
+      "elapsed_seconds": 0.0006,
+      "throughput_cells_per_ms": 16211.84,
+      "status": "PASS"
+    }
+  ],
+  "timestamp": 1794860915.759536
+}
